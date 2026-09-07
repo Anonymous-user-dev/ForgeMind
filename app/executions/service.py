@@ -9,3 +9,5 @@ async def create_execution(session: AsyncSession, *, prompt: str) -> Execution:
     async with session.begin():
         session.add(new_execution)
         await session.flush()
+
+    return new_execution
