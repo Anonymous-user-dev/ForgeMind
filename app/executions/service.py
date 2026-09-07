@@ -28,6 +28,11 @@ async def mark_execution_running(session: AsyncSession, *, execution: Execution)
         execution.status = ExecutionStatus.RUNNING
         execution.started_at = func.now()
 
+        await session.flush()
+        await session.refresh(
+            execution, attribute_names=["started_at"]
+        )
+
 
 async def mark_execution_succeeded(session: AsyncSession, *, execution: Execution, result: str) -> None:
      async with session.begin():
@@ -39,6 +44,12 @@ async def mark_execution_succeeded(session: AsyncSession, *, execution: Executio
         execution.error = None
         execution.finished_at = func.now()
 
+        await session.flush()
+        await session.refresh(
+            execution, attribute_names=["finished_at"]
+        )
+
+
 async def mark_execution_failed(session: AsyncSession, *, execution: Execution, error: str) -> None:
      async with session.begin():
         if execution.status != ExecutionStatus.RUNNING:
@@ -48,6 +59,12 @@ async def mark_execution_failed(session: AsyncSession, *, execution: Execution, 
         execution.result = None
         execution.error = error
         execution.finished_at = func.now()
+
+        await session.flush()
+        await session.refresh(
+            execution, attribute_names=["finished_at"]
+        )
+
 
 async def run_execution(session: AsyncSession, *, execution: Execution, provider: FakeAIProvider) -> None:
 
